@@ -4,11 +4,32 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
+
+const client = new ApolloClient({
+    uri: 'https://tarantino-react-todo-graphql.herokuapp.com/v1/graphql',
+    cache: new InMemoryCache({
+        typePolicies: {
+            Query: {
+                fields: {
+                    todos: {
+                        merge(existing, incoming) {
+                            return incoming;
+                        }
+                    },
+                },
+            },
+        }
+    })
+});
+
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+    <React.StrictMode>
+        <ApolloProvider client={client}>
+            <App/>
+        </ApolloProvider>
+    </React.StrictMode>,
+    document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function
