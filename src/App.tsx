@@ -50,8 +50,15 @@ function App() {
     const {loading, error, data} = useQuery(GET_TODOS)
     const [toggleTodo] = useMutation(TOGGLE_TODO)
     const [addTodo] = useMutation(ADD_TODO, {
+        update: (cache, result) => {
+            const prevData = cache.readQuery({query: GET_TODOS})
+            // @ts-ignore
+            const newTodos = [...prevData.todos, result.data.insert_todos.returning[0]]
+            cache.writeQuery({query: GET_TODOS, data: {todos: newTodos}})
+        },
         onCompleted: () => setTodoText('')
-    })
+    });
+
     const [deleteTodo] = useMutation(DELETE_TODO)
 
     if (loading) return <p>Loading...</p>;
@@ -65,7 +72,9 @@ function App() {
     const handleAddTodo = async (event: any) => {
         event.preventDefault()
         if (!todoText.trim()) return
-        const updatedData = await addTodo({variables: {text: todoText}})
+        const updatedData = await addTodo({
+            variables: {text: todoText},
+        });
         console.log('added todo', updatedData)
     }
 
